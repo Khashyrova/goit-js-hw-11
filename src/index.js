@@ -10,16 +10,16 @@ const refs = {
   button: document.querySelector('.load-more'),
 };
 refs.form.addEventListener('submit', checksTerms);
+refs.button.addEventListener('click', onLoadMore);
+
 refs.button.classList.add('hidden');
 
 const apiService = new ApiService();
 
-refs.button.addEventListener('click', onLoadMore);
-refs.button.classList.add('hidden');
 let lengthContainer = 40;
 let totalLengthContainer = 0;
 
-function checksTerms(event) {
+async function checksTerms(event) {
   event.preventDefault();
   refs.button.classList.add('hidden');
 
@@ -27,43 +27,48 @@ function checksTerms(event) {
 
   apiService.resetPage();
   resetGalery(refs.containerGalery);
+  try {
+    const data = await apiService.fetchSearch();
 
-  apiService
-    .fetchSearch()
-    .then(data => {
+    if (!apiService.query) {
+      resetGalery(refs.containerGalery);
+      refs.button.classList.add('hidden');
+      return;
+    } else if (data.totalHits === 0) {
+      resetGalery(refs.containerGalery);
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else if (data.hits.length > 0 && data.totalHits > 0) {
       createGalery(data);
-      if (!apiService.query) {
-        resetGalery(refs.containerGalery);
-        refs.button.classList.add('hidden');
-        return;
-      } else if (data.totalHits === 0) {
-        resetGalery(refs.containerGalery);
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else if (data.hits.length > 0)
-        Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
-    })
-    .catch(console.log);
+      Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-function onLoadMore() {
+async function onLoadMore() {
   lengthContainer += 40;
 
-  if (+lengthContainer >= +totalLengthContainer && +totalLengthContainer > 0) {
-    refs.button.classList.add('hidden');
-    Notiflix.Notify.info(
-      "We're sorry, but you've reached the end of search results."
-    );
+  try {
+    const data = await apiService.fetchSearch();
+    if (lengthContainer >= totalLengthContainer) {
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+      refs.button.disabled = true;
+    }
+    createGalery(data);
+  } catch (error) {
+    console.log(error);
   }
-
-  apiService.fetchSearch().then(createGalery).catch(console.log);
 }
 
 function createGalery(data) {
   const { hits, totalHits } = data;
   totalLengthContainer = totalHits;
-
+  refs.button.classList.remove('hidden');
   if (hits.length > 0) {
     const markupCard = `${hits.map(createCard).join('')}`;
 
