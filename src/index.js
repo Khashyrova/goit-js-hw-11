@@ -24,9 +24,11 @@ async function checksTerms(event) {
   refs.button.classList.add('hidden');
 
   apiService.query = event.currentTarget.elements.searchQuery.value.trim();
-
+  lengthContainer = 40;
   apiService.resetPage();
   resetGalery(refs.containerGalery);
+  refs.button.disabled = false;
+
   try {
     const data = await apiService.fetchSearch();
 
@@ -57,6 +59,9 @@ async function onLoadMore() {
       Notiflix.Notify.info(
         "We're sorry, but you've reached the end of search results."
       );
+
+      console.log(lengthContainer);
+      console.log(totalLengthContainer);
       refs.button.disabled = true;
     }
     createGalery(data);
@@ -68,7 +73,7 @@ async function onLoadMore() {
 function createGalery(data) {
   const { hits, totalHits } = data;
   totalLengthContainer = totalHits;
-  refs.button.classList.remove('hidden');
+
   if (hits.length > 0) {
     const markupCard = `${hits.map(createCard).join('')}`;
 
