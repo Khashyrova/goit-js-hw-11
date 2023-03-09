@@ -51,6 +51,7 @@ function onLoadMore() {
   lengthContainer += 40;
 
   if (+lengthContainer >= +totalLengthContainer && +totalLengthContainer > 0) {
+    refs.button.classList.add('hidden');
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
