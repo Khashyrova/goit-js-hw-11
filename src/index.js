@@ -68,7 +68,7 @@ function createGalery(data) {
     const markupCard = `${hits.map(createCard).join('')}`;
 
     refs.containerGalery.insertAdjacentHTML('beforeend', markupCard);
-
+    smoothScroll();
     refs.button.classList.remove('hidden');
 
     const lightbox = new SimpleLightbox('.photo-link', {
@@ -80,4 +80,14 @@ function createGalery(data) {
 
 function resetGalery(element) {
   element.innerHTML = '';
+}
+
+function smoothScroll() {
+  const { height: cardHeight } =
+    refs.containerGalery.firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 1,
+    behavior: 'smooth',
+  });
 }
